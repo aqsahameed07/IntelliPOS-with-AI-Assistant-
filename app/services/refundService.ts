@@ -49,15 +49,15 @@ const getAuthToken = (): string | null => {
 const authFetch = async (url: string, options: RequestInit = {}) => {
   const token = getAuthToken();
   
-  const headers: HeadersInit = {
+  const headers = new Headers({
     'Content-Type': 'application/json',
-    ...options.headers,
-  };
-  
+    ...(options.headers as HeadersInit | undefined),
+  });
+
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
-  
+
   const response = await fetch(url, {
     ...options,
     headers,
@@ -140,7 +140,7 @@ export const refundService = {
   // Create refund
   async createRefund(data: Partial<IRefund>): Promise<RefundResponse> {
     try {
-      console.log('Creating refund with data:', JSON.stringify(data, null, 2));
+    
       
       const response = await authFetch(buildApiUrl("/api/refunds"), {
         method: "POST",
@@ -148,7 +148,7 @@ export const refundService = {
       });
 
       const result = await response.json();
-      console.log('Refund creation response:', result);
+     
       
       if (!response.ok) {
         console.error('Create refund failed:', result);

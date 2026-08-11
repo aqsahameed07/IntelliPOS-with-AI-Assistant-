@@ -5,6 +5,7 @@ import { Invoice } from "@/app/models/Invoice";
 import { Product } from "@/app/models/Product";
 import { InventoryMovement } from "@/app/models/InventoryMovement";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch single invoice
 export async function GET(
@@ -106,6 +107,11 @@ export async function PUT(
           updateData,
           { new: true, runValidators: true }
         );
+
+        await logActivity(user, "invoice", `Invoice ${updatedInvoice!.number} updated`, {
+          invoiceId: id,
+          invoiceNumber: updatedInvoice!.number,
+        });
         
         return NextResponse.json({
           success: true,
@@ -173,6 +179,11 @@ export async function DELETE(
           status: "cancelled",
           deletedBy: user.id,
           deletedAt: new Date(),
+        });
+
+        await logActivity(user, "invoice", `Invoice ${invoice.number} deleted`, {
+          invoiceId: id,
+          invoiceNumber: invoice.number,
         });
         
         return NextResponse.json({

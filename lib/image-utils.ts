@@ -39,5 +39,24 @@ export function compressImageFile(file: File, maxDim = MAX_DIM, quality = QUALIT
 /** True for anything we can safely drop into an <img src>. */
 export function isDisplayableImage(src?: string) {
   if (!src) return false;
-  return /^(data:image\/|https?:\/\/|\/|blob:)/.test(src.trim());
+  const trimmed = src.trim();
+  return /^(data:image\/|https?:\/\/|\/|blob:|images\/)/.test(trimmed);
+}
+
+/** Resolve stored image paths to a browser-loadable URL. */
+export function resolveImageUrl(src?: string): string | undefined {
+  if (!src || !isDisplayableImage(src)) return undefined;
+
+  const trimmed = src.trim();
+  if (/^(data:image\/|https?:\/\/|blob:)/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const base =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : process.env.NEXT_PUBLIC_FRONTEND_URL?.replace(/\/$/, "") || "";
+
+  const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return base ? `${base}${path}` : path;
 }

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const totalRefunds = refunds.length;
     const totalRefunded = refunds.reduce((sum, r) => sum + Math.max(0, r.netRefund), 0);
     const totalExchanged = refunds.reduce((sum, r) => sum + r.exchangeSubtotal, 0);
-    const totalReturns = refunds.reduce((sum, r) => sum + r.returnedItems.reduce((s, i) => s + i.qty, 0), 0);
+    const totalReturns = refunds.reduce((sum, r) => sum + r.returnedItems.reduce((s: number, i: { qty: number }) => s + i.qty, 0), 0);
     
     // Count by type
     const byType = {

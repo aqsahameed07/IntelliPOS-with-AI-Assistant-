@@ -315,7 +315,7 @@ export default function ProductsPage() {
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, SKU, brand…" className="pl-8" />
             </div>
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={category} onValueChange={(v) => setCategory(v ?? "all")}>
               <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
@@ -362,8 +362,8 @@ export default function ProductsPage() {
                           <p className="truncate text-xs text-muted-foreground">{p.category} · {p.sku}</p>
                         </div>
                         <DropdownMenu>
-                          <DropdownMenuTrigger >
-                            <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
+                          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-7 w-7" />}>
+                            <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => setDetail(p)}>
@@ -439,7 +439,7 @@ export default function ProductsPage() {
                         <td className="p-3"><Badge variant={p.status === "active" ? "default" : "outline"}>{p.status}</Badge></td>
                         <td className="p-3">
                           <DropdownMenu>
-                            <DropdownMenuTrigger ><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                            <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}><MoreHorizontal className="h-4 w-4" /></DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => setDetail(p)}>
                                 <Eye className="mr-2 h-4 w-4" />View
@@ -537,7 +537,7 @@ export default function ProductsPage() {
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </Field>
             <Field label="Category" error={errors.category}>
-              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v ?? "" })}>
                 <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.length > 0 ? (
@@ -552,7 +552,7 @@ export default function ProductsPage() {
             <Field label="SKU" error={errors.sku}><Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} /></Field>
             <Field label="Barcode"><Input value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} /></Field>
             <Field label="Supplier / Vendor">
-              <Select value={form.supplierId || "none"} onValueChange={(v) => setForm({ ...form, supplierId: v === "none" ? "" : v })}>
+              <Select value={form.supplierId || "none"} onValueChange={(v) => setForm({ ...form, supplierId: v === "none" ? "" : (v ?? "") })}>
                 <SelectTrigger><SelectValue placeholder="Select vendor" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">— None —</SelectItem>
@@ -567,7 +567,7 @@ export default function ProductsPage() {
               </Select>
             </Field>
             <Field label="Unit">
-              <Select value={form.unit} onValueChange={(v) => setForm({ ...form, unit: v })}>
+              <Select value={form.unit} onValueChange={(v) => setForm({ ...form, unit: v ?? "Piece" })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{UNITS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
               </Select>

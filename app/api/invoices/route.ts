@@ -5,6 +5,7 @@ import { Invoice } from "@/app/models/Invoice";
 import { Product } from "@/app/models/Product";
 import { InventoryMovement } from "@/app/models/InventoryMovement";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // Helper function to generate invoice number
 async function generateInvoiceNumber() {
@@ -59,13 +60,14 @@ export async function GET(request: NextRequest) {
     
     // Date range filter
     if (startDate || endDate) {
-      query.createdAt = {};
+      const createdAt: Record<string, Date> = {};
       if (startDate) {
-        query.createdAt.$gte = new Date(startDate);
+        createdAt.$gte = new Date(startDate);
       }
       if (endDate) {
-        query.createdAt.$lte = new Date(endDate + 'T23:59:59.999Z');
+        createdAt.$lte = new Date(endDate + 'T23:59:59.999Z');
       }
+      query.createdAt = createdAt;
     }
     
     const [invoices, total] = await Promise.all([
@@ -121,7 +123,7 @@ export async function POST(request: NextRequest) {
         const validatedItems = [];
         for (let i = 0; i < body.items.length; i++) {
           const item = body.items[i];
-          console.log(`🔍 Checking item ${i + 1}:`, item);
+          
           
           // Check if product exists
           const product = await Product.findOne({
@@ -130,14 +132,14 @@ export async function POST(request: NextRequest) {
           });
           
           if (!product) {
-            console.log(`❌ Product not found: ${item.productId}`);
+          
             return NextResponse.json({
               success: false,
               error: `Product "${item.name || item.productId}" not found`,
             }, { status: 404 });
           }
-          
-          console.log(`✅ Product found: ${product.name}, Stock: ${product.stock}, Requested: ${item.qty}`);
+        
+         
           
           // Check stock
           if (product.stock < item.qty) {

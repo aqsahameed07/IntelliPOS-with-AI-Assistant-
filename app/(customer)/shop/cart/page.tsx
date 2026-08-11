@@ -87,9 +87,7 @@ export default function CartPage() {
           title="Your cart is empty"
           description="Browse products and add some items."
           action={
-            <Button >
-              <Link href="/shop">Start shopping</Link>
-            </Button>
+            <Button render={<Link href="/shop" />}>Start shopping</Button>
           }
         />
       ) : (

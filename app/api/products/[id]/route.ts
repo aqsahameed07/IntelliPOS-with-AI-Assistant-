@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import { saveBase64Image, isBase64Image } from "@/lib/server-image-utils";
 import { Product } from "@/app/models/Product";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch single product by ID (Public)
 export async function GET(
@@ -156,6 +157,11 @@ if (gallery && Array.isArray(gallery) && gallery.length > 0) {
           },
           { new: true, runValidators: true }
         );
+
+        await logActivity(user, "product", `Product "${updatedProduct!.name}" updated`, {
+          productId: id,
+          name: updatedProduct!.name,
+        });
         
         return NextResponse.json({
           success: true,
@@ -215,6 +221,11 @@ export async function DELETE(
           status: "inactive",
           deletedBy: user.id,
           deletedAt: new Date(),
+        });
+
+        await logActivity(user, "product", `Product "${product.name}" deleted`, {
+          productId: id,
+          name: product.name,
         });
         
         return NextResponse.json({
@@ -291,13 +302,20 @@ export async function PATCH(
           },
           { new: true }
         );
+
+        await logActivity(user, "product", `Stock updated for "${product.name}" (${product.stock} → ${updatedProduct!.stock})`, {
+          productId: id,
+          name: product.name,
+          previousStock: product.stock,
+          newStock: updatedProduct!.stock,
+        });
         
         return NextResponse.json({
           success: true,
           data: {
-            stock: updatedProduct.stock,
-            minStock: updatedProduct.minStock,
-            isLowStock: updatedProduct.stock <= updatedProduct.minStock,
+            stock: updatedProduct!.stock,
+            minStock: updatedProduct!.minStock,
+            isLowStock: updatedProduct!.stock <= updatedProduct!.minStock,
           },
           message: "Stock updated successfully",
         }, { status: 200 });

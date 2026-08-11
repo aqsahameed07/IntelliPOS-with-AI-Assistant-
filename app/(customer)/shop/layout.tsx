@@ -135,16 +135,12 @@ export default function CustomerLayout({
             </Link>
 
             <DropdownMenu>
-              <DropdownMenuTrigger >
-                <div className="cursor-pointer">
-                  <Button variant="ghost" className="h-9 gap-2 px-2">
-                    <Avatar className="h-7 w-7">
-                      <AvatarFallback className="bg-primary text-xs text-primary-foreground">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </div>
+              <DropdownMenuTrigger render={<Button variant="ghost" className="h-9 gap-2 px-2" />}>
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="bg-primary text-xs text-primary-foreground">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="w-56">
@@ -158,18 +154,14 @@ export default function CustomerLayout({
                 <DropdownMenuSeparator />
 
                 <DropdownMenuGroup>
-                  <DropdownMenuItem >
-                    <Link href="/shop/profile">
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
+                  <DropdownMenuItem render={<Link href="/shop/profile" className="flex items-center" />}>
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem >
-                    <Link href="/shop/orders">
-                      <Package className="mr-2 h-4 w-4" />
-                      My orders
-                    </Link>
+                  <DropdownMenuItem render={<Link href="/shop/orders" className="flex items-center" />}>
+                    <Package className="mr-2 h-4 w-4" />
+                    My orders
                   </DropdownMenuItem>
 
                   <DropdownMenuItem

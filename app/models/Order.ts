@@ -26,6 +26,7 @@ export interface IOrder extends Document {
   paymentMethod: "cash" | "card" | "bank";
   paymentStatus: "pending" | "paid" | "failed";
   orderStatus: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  status?: string;
   shippingAddress: {
     name: string;
     phone: string;

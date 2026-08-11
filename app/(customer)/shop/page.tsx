@@ -24,9 +24,13 @@ export default function ShopPage() {
   const { products, loading, fetchProducts } = useProducts();
   const { user } = useAuth();
   
+  // Get user ID and email
   const userId = user?.id || "";
   const userEmail = user?.email || "";
   
+
+  
+  // ✅ Pass both userId AND userEmail
   const { add, totalItems } = useCustomerCart(userId, userEmail);
 
   const [q, setQ] = useState("");
@@ -65,10 +69,9 @@ export default function ShopPage() {
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         break;
-      // Remove "popular" case if sales doesn't exist on product
-      // case "popular":
-      //   list = [...list].sort((a, b) => (b.sales || 0) - (a.sales || 0));
-      //   break;
+      case "popular":
+        list = [...list].sort((a, b) => (b.sales || 0) - (a.sales || 0));
+        break;
       case "name_asc":
         list = [...list].sort((a, b) => a.name.localeCompare(b.name));
         break;
@@ -110,12 +113,7 @@ export default function ShopPage() {
             className="pl-8"
           />
         </div>
-        
-        {/* Category Select - Fixed onValueChange */}
-        <Select 
-          value={category} 
-          onValueChange={(value) => setCategory(value || "all")}
-        >
+        <Select value={category} onValueChange={(v) => setCategory(v ?? "all")}>
           <SelectTrigger className="w-48">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
@@ -128,19 +126,13 @@ export default function ShopPage() {
             ))}
           </SelectContent>
         </Select>
-        
-        {/* Sort Select - Fixed onValueChange and removed "popular" option */}
-        <Select 
-          value={sort} 
-          onValueChange={(value) => setSort(value || "newest")}
-        >
+        <Select value={sort} onValueChange={(v) => setSort(v ?? "newest")}>
           <SelectTrigger className="w-48">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="newest">Newest Arrivals</SelectItem>
-            {/* Remove "popular" option if sales doesn't exist */}
-            {/* <SelectItem value="popular">Most Popular</SelectItem> */}
+            <SelectItem value="popular">Most Popular</SelectItem>
             <SelectItem value="price_low">Price: Low to High</SelectItem>
             <SelectItem value="price_high">Price: High to Low</SelectItem>
             <SelectItem value="name_asc">Name: A to Z</SelectItem>

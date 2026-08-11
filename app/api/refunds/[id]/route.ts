@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Refund } from "@/app/models/Refund";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch single refund
 export async function GET(
@@ -99,6 +100,11 @@ export async function PUT(
           updateData,
           { new: true, runValidators: true }
         );
+
+        await logActivity(user, "refund", `Refund ${updatedRefund!.number} updated`, {
+          refundId: id,
+          refundNumber: updatedRefund!.number,
+        });
         
         return NextResponse.json({
           success: true,
@@ -155,6 +161,11 @@ export async function DELETE(
           isDeleted: true,
           deletedBy: user.id,
           deletedAt: new Date(),
+        });
+
+        await logActivity(user, "refund", `Refund ${refund.number} deleted`, {
+          refundId: id,
+          refundNumber: refund.number,
         });
         
         return NextResponse.json({

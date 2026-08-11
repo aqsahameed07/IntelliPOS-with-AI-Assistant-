@@ -1,6 +1,22 @@
 // app/models/Vendor.ts
 import mongoose, { Schema, model, models } from "mongoose";
 
+export interface IVendor {
+  _id?: string;
+  name: string;
+  contactName?: string;
+  email: string;
+  phone: string;
+  address?: string;
+  gstin?: string;
+  notes?: string;
+  image?: string;
+  status: "active" | "inactive";
+  createdBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 const VendorSchema = new Schema(
   {
     name: {
@@ -34,6 +50,10 @@ const VendorSchema = new Schema(
     notes: {
       type: String,
       default: "",
+    },
+    image: {
+      type: String,
+      trim: true,
     },
     status: {
       type: String,

@@ -1,8 +1,10 @@
 // app/api/vendors/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
+import { saveBase64Image, isBase64Image } from "@/lib/server-image-utils";
 import Vendor from "@/app/models/Vendor";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch all vendors
 export async function GET(request: NextRequest) {
@@ -113,8 +115,16 @@ export async function POST(request: NextRequest) {
           address: body.address || "",
           gstin: body.gstin || "",
           notes: body.notes || "",
+          image: isBase64Image(body.image)
+            ? await saveBase64Image(body.image, "vendor", "vendors")
+            : body.image?.trim() || undefined,
           status: body.status || "active",
           createdBy: user.id,
+        });
+
+        await logActivity(user, "vendor", `Vendor "${vendor.name}" created`, {
+          vendorId: vendor._id,
+          name: vendor.name,
         });
 
         return NextResponse.json({

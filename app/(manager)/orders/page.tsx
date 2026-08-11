@@ -97,7 +97,7 @@ export default function OrdersPage() {
                 className="pl-8" 
               />
             </div>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(v) => setStatus(v ?? "all")}>
               <SelectTrigger className="w-52">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>

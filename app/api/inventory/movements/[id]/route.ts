@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import { InventoryMovement } from "@/app/models/InventoryMovement";
 import { Product } from "@/app/models/Product";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch single movement
 export async function GET(
@@ -104,6 +105,13 @@ export async function DELETE(
         // Soft delete the movement
         await InventoryMovement.findByIdAndUpdate(id, {
           isDeleted: true,
+        });
+
+        await logActivity(user, "inventory", `Inventory movement deleted: ${movement.productName}`, {
+          movementId: id,
+          productId: movement.productId,
+          productName: movement.productName,
+          type: movement.type,
         });
         
         return NextResponse.json({

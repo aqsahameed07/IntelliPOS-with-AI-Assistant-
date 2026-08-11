@@ -1,6 +1,21 @@
 // app/models/Employee.ts
 import mongoose, { Schema, model, models } from "mongoose";
 
+export interface IEmployee {
+  _id?: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  department: string;
+  salary: number;
+  status: "active" | "inactive";
+  userId: string;
+  createdBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 const EmployeeSchema = new Schema(
   {
     name: {

@@ -55,9 +55,7 @@ export default function MyOrderDetail() {
         <CardContent className="p-8 text-center text-muted-foreground">
           Order not found.
           <div className="mt-4">
-            <Button >
-              <Link href="/shop/orders">Back to orders</Link>
-            </Button>
+            <Button render={<Link href="/shop/orders" />}>Back to orders</Button>
           </div>
         </CardContent>
       </Card>
@@ -73,11 +71,9 @@ export default function MyOrderDetail() {
 
   return (
     <div className="space-y-6">
-      <Button variant="ghost" size="sm" >
-        <Link href="/shop/orders">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to orders
-        </Link>
+      <Button variant="ghost" size="sm" render={<Link href="/shop/orders" />}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to orders
       </Button>
 
       <div className="flex items-center gap-3 flex-wrap">

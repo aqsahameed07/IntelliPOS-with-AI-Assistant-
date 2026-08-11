@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import Employee from "@/app/models/Employee";
 import User from "@/app/models/User";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 import bcrypt from "bcryptjs";
 
 // GET - Fetch all employees
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
         await connectDB();
 
         const body = await request.json();
-        console.log("📦 Received employee data:", JSON.stringify(body, null, 2));
+       
 
         // Validate required fields
         if (!body.name) {
@@ -168,7 +169,7 @@ export async function POST(request: NextRequest) {
           createdBy: user.id,
         });
 
-        console.log("✅ User created:", newUser._id);
+        
 
         // 2. Create Employee linked to the user
         const employee = await Employee.create({
@@ -183,7 +184,13 @@ export async function POST(request: NextRequest) {
           createdBy: user.id,
         });
 
-        console.log("✅ Employee created:", employee._id);
+        
+
+        await logActivity(user, "employee", `Employee "${employee.name}" created`, {
+          employeeId: employee._id,
+          name: employee.name,
+          email: employee.email,
+        });
 
         return NextResponse.json({
           success: true,

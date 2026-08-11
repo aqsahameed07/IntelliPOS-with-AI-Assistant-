@@ -147,7 +147,7 @@ export default function CheckoutPage() {
 
       // ✅ Clear cart from database after successful order
       const clearResult = await clear();
-      console.log("Cart cleared:", clearResult);
+     
 
       // ✅ Also clear any local storage cart
       if (typeof window !== "undefined") {
@@ -185,8 +185,8 @@ export default function CheckoutPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button >
-              <Link href={`/shop/orders/${placedOrder.id}`}>View order</Link>
+            <Button render={<Link href={`/shop/orders/${placedOrder.id}`} />}>
+              View order
             </Button>
             <Button variant="outline" onClick={() => router.push("/shop")}>
               Continue shopping

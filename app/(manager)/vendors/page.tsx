@@ -1,11 +1,10 @@
 // app/(manager)/vendors/page.tsx
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useVendors } from "@/app/hooks/useVendors";
 import { useProducts } from "@/app/hooks/useProducts";
 import { useInventory } from "@/app/hooks/useInventory";
-import { useActivities } from "@/app/hooks/useActivities";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
-import { Plus, MoreHorizontal, Search, Eye, Pencil, Trash2, Truck, Loader2 } from "lucide-react";
+import { Plus, MoreHorizontal, Search, Eye, Pencil, Trash2, Truck, Loader2, Upload, X } from "lucide-react";
+import { EntityImage } from "@/components/entity-image";
+import { compressImageFile } from "@/lib/image-utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +36,8 @@ type FormState = {
   phone: string; 
   address: string; 
   gstin: string; 
-  notes: string; 
+  notes: string;
+  image: string;
 };
 
 const emptyForm: FormState = { 
@@ -45,7 +47,8 @@ const emptyForm: FormState = {
   phone: "", 
   address: "", 
   gstin: "", 
-  notes: "" 
+  notes: "",
+  image: "",
 };
 
 export default function VendorsPage() {
@@ -62,13 +65,13 @@ export default function VendorsPage() {
 
   const { products, fetchProducts } = useProducts();
   const { movements, fetchMovements } = useInventory();
-  const { logActivity } = useActivities();
 
   const [q, setQ] = useState("");
   const [dialog, setDialog] = useState<{ mode: "add" | "edit"; id?: string } | null>(null);
   const [detail, setDetail] = useState<any | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // Delete dialog state
   const [deleteDialog, setDeleteDialog] = useState<{ 
@@ -108,9 +111,23 @@ export default function VendorsPage() {
       phone: v.phone, 
       address: v.address || "", 
       gstin: v.gstin || "", 
-      notes: v.notes || "" 
+      notes: v.notes || "",
+      image: v.image || "",
     });
     setDialog({ mode: "edit", id: v._id });
+  };
+
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    try {
+      const src = await compressImageFile(f);
+      setForm((s) => ({ ...s, image: src }));
+      toast.success("Image attached");
+    } catch {
+      toast.error("Could not read that image");
+    }
   };
 
   const validate = () => {
@@ -143,13 +160,13 @@ export default function VendorsPage() {
         address: form.address.trim(),
         gstin: form.gstin.trim(),
         notes: form.notes.trim(),
+        image: form.image ? form.image.trim() : undefined,
         status: "active" as const,
       };
 
       if (dialog?.mode === "add") {
         const result = await createVendor(vendorData);
         if (result) {
-          await logActivity("system", `Vendor '${form.name}' added`);
           toast.success("Vendor added successfully");
           setDialog(null);
           await fetchVendors();
@@ -157,7 +174,6 @@ export default function VendorsPage() {
       } else if (dialog?.id) {
         const result = await updateVendor({ id: dialog.id, data: vendorData });
         if (result) {
-          await logActivity("system", `Vendor '${form.name}' updated`);
           toast.success("Vendor updated successfully");
           setDialog(null);
           await fetchVendors();
@@ -183,7 +199,6 @@ export default function VendorsPage() {
     
     const success = await deleteVendor({ id: deleteDialog.vendorId });
     if (success) {
-      await logActivity("system", `Vendor "${deleteDialog.vendorName}" deleted`);
       toast.success(`Vendor "${deleteDialog.vendorName}" deleted successfully`);
       setDeleteDialog({ open: false, vendorId: null, vendorName: "" });
       await fetchVendors();
@@ -243,6 +258,7 @@ export default function VendorsPage() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50 text-left">
                   <tr>
+                    <th className="p-3 w-16" />
                     <th className="p-3">Vendor</th>
                     <th className="p-3">Contact</th>
                     <th className="p-3">Email</th>
@@ -256,6 +272,14 @@ export default function VendorsPage() {
                     const productCount = products.filter((p) => p.supplierId === v._id).length;
                     return (
                       <tr key={v._id} className="border-t">
+                        <td className="p-3">
+                          <EntityImage
+                            src={v.image}
+                            alt={v.name}
+                            icon={Truck}
+                            className="h-10 w-10 rounded-md"
+                          />
+                        </td>
                         <td className="p-3 font-medium">{v.name}</td>
                         <td className="p-3">{v.contactName || "—"}</td>
                         <td className="p-3">{v.email}</td>
@@ -263,10 +287,8 @@ export default function VendorsPage() {
                         <td className="p-3">{productCount}</td>
                         <td className="p-3">
                           <DropdownMenu>
-                            <DropdownMenuTrigger >
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
+                            <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}>
+                              <MoreHorizontal className="h-4 w-4" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => setDetail(v)}>
@@ -306,6 +328,49 @@ export default function VendorsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3 sm:grid-cols-2">
+            <div className="flex items-start gap-4 sm:col-span-2">
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border">
+                <EntityImage
+                  src={form.image}
+                  alt="Vendor preview"
+                  icon={Truck}
+                  className="h-full w-full"
+                />
+                {form.image && (
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute right-1 top-1 h-6 w-6"
+                    onClick={() => setForm({ ...form, image: "" })}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handleImage}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload image
+                </Button>
+                <Input
+                  placeholder="…or paste image URL"
+                  value={form.image.startsWith("data:") ? "" : form.image}
+                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                />
+              </div>
+            </div>
             <FormField label="Vendor name" className="sm:col-span-2">
               <Input 
                 value={form.name} 
@@ -378,6 +443,14 @@ export default function VendorsPage() {
           </DialogHeader>
           {detail && (
             <div className="space-y-4 text-sm">
+              {detail.image && (
+                <EntityImage
+                  src={detail.image}
+                  alt={detail.name}
+                  icon={Truck}
+                  className="aspect-video w-full rounded-md"
+                />
+              )}
               <div className="rounded-md border p-3">
                 <p><span className="text-muted-foreground">Phone:</span> {detail.phone}</p>
                 <p><span className="text-muted-foreground">Address:</span> {detail.address || "—"}</p>

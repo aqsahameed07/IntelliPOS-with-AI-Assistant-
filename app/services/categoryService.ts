@@ -47,14 +47,14 @@ const getAuthToken = (): string | null => {
 const authFetch = async (url: string, options: RequestInit = {}) => {
   const token = getAuthToken();
   
-  const headers: HeadersInit = {
+  const headers = new Headers({
     'Content-Type': 'application/json',
-    ...options.headers,
-  };
+    ...(options.headers as HeadersInit | undefined),
+  });
   
   // Add authorization header if token exists
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
   
   const response = await fetch(url, {

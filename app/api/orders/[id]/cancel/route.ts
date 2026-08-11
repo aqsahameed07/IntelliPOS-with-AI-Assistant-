@@ -5,6 +5,7 @@ import { Order } from "@/app/models/Order";
 import { Product } from "@/app/models/Product";
 import { InventoryMovement } from "@/app/models/InventoryMovement";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // PATCH - Cancel order
 export async function PATCH(
@@ -81,6 +82,12 @@ export async function PATCH(
           notes: order.notes
             ? `${order.notes}\nCancelled: ${reason || "No reason provided"}`
             : `Cancelled: ${reason || "No reason provided"}`,
+        });
+
+        await logActivity(user, "order", `Order ${order.number} cancelled`, {
+          orderId: id,
+          orderNumber: order.number,
+          reason,
         });
 
         return NextResponse.json({

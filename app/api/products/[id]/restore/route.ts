@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Product } from "@/app/models/Product";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // PATCH - Restore soft-deleted product (Admin only)
 export async function PATCH(
@@ -45,6 +46,11 @@ export async function PATCH(
           deletedBy: undefined,
           deletedAt: undefined,
           updatedBy: user.id,
+        });
+
+        await logActivity(user, "product", `Product "${product.name}" restored`, {
+          productId: id,
+          name: product.name,
         });
         
         return NextResponse.json({

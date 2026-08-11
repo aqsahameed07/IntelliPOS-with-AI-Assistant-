@@ -168,7 +168,7 @@ export function useInvoices(): UseInvoicesReturn {
       if (result.success) {
         setInvoices(prev => 
           prev.map(inv => 
-            inv._id === id ? { ...inv, status: "cancelled" as const } : inv
+            inv._id === id ? ({ ...inv, status: "cancelled" as const } as IInvoice) : inv
           )
         );
         toast.success(result.message || "Invoice cancelled successfully");
@@ -192,7 +192,7 @@ export function useInvoices(): UseInvoicesReturn {
       if (result.success) {
         setInvoices(prev => 
           prev.map(inv => 
-            inv._id === id ? { ...inv, paymentStatus: paymentStatus as any } : inv
+            inv._id === id ? ({ ...inv, paymentStatus: paymentStatus as IInvoice["paymentStatus"] } as IInvoice) : inv
           )
         );
         toast.success(result.message || "Payment status updated successfully");

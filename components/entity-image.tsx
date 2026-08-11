@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { isDisplayableImage } from "@/lib/image-utils";
+import { resolveImageUrl } from "@/lib/image-utils";
 
 type Props = {
   src?: string;
@@ -18,13 +18,14 @@ type Props = {
 export function EntityImage({ src, alt, className, imgClassName, icon: Icon = ImageOff, iconClassName }: Props) {
   const [broken, setBroken] = useState(false);
   useEffect(() => setBroken(false), [src]);
-  const show = isDisplayableImage(src) && !broken;
+  const resolvedSrc = resolveImageUrl(src);
+  const show = !!resolvedSrc && !broken;
 
   return (
     <div className={cn("relative overflow-hidden bg-muted", className)}>
       {show ? (
         <img
-          src={src}
+          src={resolvedSrc}
           alt={alt}
           loading="lazy"
           onError={() => setBroken(true)}
