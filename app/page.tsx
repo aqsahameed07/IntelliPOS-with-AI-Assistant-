@@ -99,7 +99,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-sm text-primary-foreground/70">
-          © 2026 Nimbus, Inc.
+          © 2026 IntelliPos, Designed by AqsaHameed.
         </p>
       </div>
 
