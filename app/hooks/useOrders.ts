@@ -135,7 +135,7 @@ export function useOrders(): UseOrdersReturn {
       if (result.success) {
         setOrders(prev =>
           prev.map(order =>
-            order._id === id ? { ...order, orderStatus: orderStatus as any } : order
+            order._id === id ? ({ ...order, orderStatus: orderStatus as IOrder["orderStatus"] } as IOrder) : order
           )
         );
         toast.success(result.message || "Order status updated");
@@ -157,7 +157,7 @@ export function useOrders(): UseOrdersReturn {
       if (result.success) {
         setOrders(prev =>
           prev.map(order =>
-            order._id === id ? { ...order, paymentStatus: paymentStatus as any } : order
+            order._id === id ? ({ ...order, paymentStatus: paymentStatus as IOrder["paymentStatus"] } as IOrder) : order
           )
         );
         toast.success(result.message || "Payment status updated");
@@ -179,7 +179,7 @@ export function useOrders(): UseOrdersReturn {
       if (result.success) {
         setOrders(prev =>
           prev.map(order =>
-            order._id === id ? { ...order, orderStatus: "cancelled" as const } : order
+            order._id === id ? ({ ...order, orderStatus: "cancelled" as const } as IOrder) : order
           )
         );
         toast.success(result.message || "Order cancelled");

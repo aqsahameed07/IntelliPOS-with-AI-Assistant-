@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Customer from "@/app/models/Customer";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // PATCH - Update total purchases
 export async function PATCH(
@@ -48,6 +49,12 @@ export async function PATCH(
           },
           { new: true }
         );
+
+        await logActivity(user, "customer", `Customer "${customer.name}" total purchases updated (+${amount})`, {
+          customerId: id,
+          name: customer.name,
+          amount,
+        });
 
         return NextResponse.json({
           success: true,

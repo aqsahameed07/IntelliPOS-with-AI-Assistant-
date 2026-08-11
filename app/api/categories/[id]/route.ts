@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import { saveBase64Image, isBase64Image } from "@/lib/server-image-utils";
 import { Category } from "@/app/models/Category";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch single category by ID (Public)
 export async function GET(
@@ -114,6 +115,11 @@ export async function PUT(
           },
           { new: true, runValidators: true }
         );
+
+        await logActivity(user, "category", `Category "${updatedCategory!.name}" updated`, {
+          categoryId: id,
+          name: updatedCategory!.name,
+        });
         
         return NextResponse.json({
           success: true,
@@ -138,7 +144,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  console.log("DELETE request received for category ID:", params);  
+ 
   return withAuth(
     request,
     async (user) => {
@@ -173,6 +179,11 @@ export async function DELETE(
           status: "inactive",
           deletedBy: user.id,
           deletedAt: new Date(),
+        });
+
+        await logActivity(user, "category", `Category "${category.name}" deleted`, {
+          categoryId: id,
+          name: category.name,
         });
         
         return NextResponse.json({

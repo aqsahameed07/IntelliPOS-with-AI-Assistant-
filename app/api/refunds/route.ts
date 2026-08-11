@@ -6,6 +6,7 @@ import { Invoice } from "@/app/models/Invoice";
 import { Product } from "@/app/models/Product";
 import { InventoryMovement } from "@/app/models/InventoryMovement";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch all refunds
 export async function GET(request: NextRequest) {
@@ -49,13 +50,14 @@ export async function GET(request: NextRequest) {
     
     // Date range filter
     if (startDate || endDate) {
-      query.createdAt = {};
+      const createdAt: Record<string, Date> = {};
       if (startDate) {
-        query.createdAt.$gte = new Date(startDate);
+        createdAt.$gte = new Date(startDate);
       }
       if (endDate) {
-        query.createdAt.$lte = new Date(endDate + 'T23:59:59.999Z');
+        createdAt.$lte = new Date(endDate + 'T23:59:59.999Z');
       }
+      query.createdAt = createdAt;
     }
     
     const [refunds, total] = await Promise.all([
@@ -268,6 +270,13 @@ export async function POST(request: NextRequest) {
         await Invoice.findByIdAndUpdate(body.invoiceId, {
           paymentStatus: newStatus,
           updatedBy: user.id,
+        });
+
+        await logActivity(user, "refund", `Refund ${refund.number} processed ($${refund.netRefund})`, {
+          refundId: refund._id,
+          refundNumber: refund.number,
+          netRefund: refund.netRefund,
+          invoiceNumber: invoice.number,
         });
         
         return NextResponse.json({

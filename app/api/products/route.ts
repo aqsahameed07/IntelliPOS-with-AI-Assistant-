@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import { saveBase64Image, isBase64Image } from "@/lib/server-image-utils";
 import { Product } from "@/app/models/Product";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch all products (Public)
 export async function GET(request: NextRequest) {
@@ -176,6 +177,12 @@ if (gallery.length > 0) {
           status: body.status || "active",
           createdBy: user.id,
           updatedBy: user.id,
+        });
+
+        await logActivity(user, "product", `Product "${product.name}" created`, {
+          productId: product._id,
+          name: product.name,
+          sku: product.sku,
         });
         
         return NextResponse.json({

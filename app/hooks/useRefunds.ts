@@ -169,7 +169,7 @@ export function useRefunds(): UseRefundsReturn {
       if (result.success) {
         setRefunds(prev => 
           prev.map(r => 
-            r._id === id ? { ...r, status: "cancelled" as const } : r
+            r._id === id ? ({ ...r, status: "cancelled" as const } as IRefund) : r
           )
         );
         toast.success(result.message || "Refund cancelled successfully");

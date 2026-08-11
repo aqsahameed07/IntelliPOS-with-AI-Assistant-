@@ -76,13 +76,12 @@ export default function AssistantPage() {
     setIsProcessing(true);
 
     try {
-      let reply: string;
+      let reply;
       
       if (isServiceReady) {
         // Use Python AI service
         const result = await aiClient.sendMessage(text, user?.id || "guest", user?.email || "guest@guest.com");
-        // Ensure we have a string reply
-        reply = result.reply || result.error || "Sorry, I couldn't process your request. Please try again.";
+        reply = result.reply || result.error;
       } else {
         // Fallback: use simple response
         reply = fallbackResponse(text);
@@ -91,18 +90,11 @@ export default function AssistantPage() {
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
         role: "ai",
-        text: reply,
+        text: reply ?? "Sorry, I couldn't generate a response.",
       };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       toast.error("Failed to get AI response");
-      // Add error message to chat
-      const errorMessage: Message = {
-        id: `ai-${Date.now()}`,
-        role: "ai",
-        text: "Sorry, I encountered an error. Please try again later.",
-      };
-      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsProcessing(false);
     }
@@ -121,12 +113,6 @@ export default function AssistantPage() {
     }
     if (text.includes("customer")) {
       return "👥 Customer management is in the Customers section.";
-    }
-    if (text.includes("revenue") || text.includes("sales")) {
-      return "💰 You can view sales and revenue in the Dashboard or Sales sections.";
-    }
-    if (text.includes("employee") || text.includes("team")) {
-      return "👨‍💼 Employee management is available in the Employees section.";
     }
     return "I'm your AI assistant. I'm currently in fallback mode. Please try asking about products, customers, or sales.";
   };

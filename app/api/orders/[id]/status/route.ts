@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Order } from "@/app/models/Order";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // PATCH - Update order status
 export async function PATCH(
@@ -58,6 +59,12 @@ export async function PATCH(
         }
 
         await Order.findByIdAndUpdate(id, updateData);
+
+        await logActivity(user, "order", `Order ${order.number} status changed to ${orderStatus}`, {
+          orderId: id,
+          orderNumber: order.number,
+          orderStatus,
+        });
 
         return NextResponse.json({
           success: true,

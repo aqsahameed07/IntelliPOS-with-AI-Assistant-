@@ -14,13 +14,13 @@ export interface IProduct extends Document {
   purchasePrice: number;
   sellingPrice: number;
   discount: number;
-  sales?: number;
   tax: number;
   unit: string;
   tags: string[];
   stock: number;
   minStock: number;
   status: "active" | "inactive";
+  sales?: number;
   isDeleted: boolean;
   createdBy: string;
   updatedBy: string;

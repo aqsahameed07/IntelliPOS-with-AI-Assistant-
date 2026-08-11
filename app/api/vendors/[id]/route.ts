@@ -1,8 +1,10 @@
 // app/api/vendors/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
+import { saveBase64Image, isBase64Image } from "@/lib/server-image-utils";
 import Vendor from "@/app/models/Vendor";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Get single vendor
 export async function GET(
@@ -98,10 +100,18 @@ export async function PUT(
             address: body.address || "",
             gstin: body.gstin || "",
             notes: body.notes || "",
+            image: isBase64Image(body.image)
+              ? await saveBase64Image(body.image, "vendor", "vendors")
+              : body.image?.trim() || undefined,
             status: body.status,
           },
           { new: true, runValidators: true }
         );
+
+        await logActivity(user, "vendor", `Vendor "${updatedVendor!.name}" updated`, {
+          vendorId: id,
+          name: updatedVendor!.name,
+        });
 
         return NextResponse.json({
           success: true,
@@ -150,6 +160,11 @@ export async function DELETE(
         }
 
         await Vendor.findByIdAndDelete(id);
+
+        await logActivity(user, "vendor", `Vendor "${vendor.name}" deleted`, {
+          vendorId: id,
+          name: vendor.name,
+        });
 
         return NextResponse.json({
           success: true,

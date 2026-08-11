@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import Employee from "@/app/models/Employee";
 import User from "@/app/models/User";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 import bcrypt from "bcryptjs";
 
 // GET - Get single employee
@@ -58,7 +59,7 @@ export async function PUT(
 
         const { id } = await params;
         const body = await request.json();
-        console.log("📦 Received update data:", JSON.stringify(body, null, 2));
+       
 
         if (!id) {
           return NextResponse.json({
@@ -69,7 +70,7 @@ export async function PUT(
 
         // Find the existing employee
         const existingEmployee = await Employee.findOne({ _id: id });
-        console.log("📦 Existing employee:", existingEmployee);
+        
 
         if (!existingEmployee) {
           return NextResponse.json({
@@ -125,7 +126,7 @@ export async function PUT(
           employeeUpdateData,
           { new: true, runValidators: true }
         );
-        console.log("✅ Employee updated:", updatedEmployee);
+        
 
         // Update the linked User record
         if (existingEmployee.userId) {
@@ -151,17 +152,22 @@ export async function PUT(
               }, { status: 400 });
             }
             userUpdateData.password = await bcrypt.hash(body.password, 10);
-            console.log("🔑 Password updated");
+           
           }
 
-          console.log("📦 Updating user with:", userUpdateData);
+         
           const updatedUser = await User.findByIdAndUpdate(
             existingEmployee.userId,
             userUpdateData,
             { new: true, runValidators: true }
           );
-          console.log("✅ User updated:", updatedUser);
+        
         }
+
+        await logActivity(user, "employee", `Employee "${updatedEmployee!.name}" updated`, {
+          employeeId: id,
+          name: updatedEmployee!.name,
+        });
 
         return NextResponse.json({
           success: true,
@@ -221,13 +227,18 @@ export async function DELETE(
 
         // Delete the employee
         await Employee.findByIdAndDelete(id);
-        console.log("✅ Employee deleted:", id);
+        
 
         // Delete the linked user
         if (employee.userId) {
           await User.findByIdAndDelete(employee.userId);
-          console.log("✅ User deleted:", employee.userId);
+         
         }
+
+        await logActivity(user, "employee", `Employee "${employee.name}" deleted`, {
+          employeeId: id,
+          name: employee.name,
+        });
 
         return NextResponse.json({
           success: true,

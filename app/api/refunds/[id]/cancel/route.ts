@@ -6,6 +6,7 @@ import { Invoice } from "@/app/models/Invoice";
 import { Product } from "@/app/models/Product";
 import { InventoryMovement } from "@/app/models/InventoryMovement";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // PATCH - Cancel refund and reverse stock changes
 export async function PATCH(
@@ -101,6 +102,12 @@ export async function PATCH(
           }
         }
         
+        await logActivity(user, "refund", `Refund ${refund.number} cancelled`, {
+          refundId: id,
+          refundNumber: refund.number,
+          reason,
+        });
+
         return NextResponse.json({
           success: true,
           message: "Refund cancelled and stock restored",

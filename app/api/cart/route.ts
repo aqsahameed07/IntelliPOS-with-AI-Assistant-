@@ -67,15 +67,11 @@ export async function POST(request: NextRequest) {
     await connectDB();
     
     const body = await request.json();
-    console.log("📦 API Received body:", JSON.stringify(body, null, 2));
+
     
     const { userId, productId, qty = 1, userEmail = "" } = body;
     
-    console.log("📦 userId:", userId);
-    console.log("📦 productId:", productId);
-    console.log("📦 qty:", qty);
-    console.log("📦 userEmail:", userEmail);
-    console.log("📦 userEmail type:", typeof userEmail);
+  
     
     if (!userId || !productId) {
       return NextResponse.json({
@@ -88,7 +84,7 @@ export async function POST(request: NextRequest) {
     let cart = await Cart.findOne({ userId });
     
     if (!cart) {
-      console.log("📦 Creating new cart with email:", userEmail);
+    
       cart = new Cart({
         userId,
         userEmail: userEmail || "",
@@ -97,7 +93,7 @@ export async function POST(request: NextRequest) {
     } else {
       // ALWAYS update email if we have one
       if (userEmail) {
-        console.log("📦 Updating email from:", cart.userEmail, "to:", userEmail);
+     
         cart.userEmail = userEmail;
       }
     }
@@ -118,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
     
     await cart.save();
-    console.log("📦 Cart saved with email:", cart.userEmail);
+   
     
     return NextResponse.json({
       success: true,

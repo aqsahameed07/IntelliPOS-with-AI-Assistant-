@@ -1,7 +1,7 @@
 // app/(manager)/dashboard/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/page-header";
@@ -29,6 +29,7 @@ import {
 import { useProducts } from "@/app/hooks/useProducts";
 import { useCustomers } from "@/app/hooks/useCustomers";
 import { useOrders } from "@/app/hooks/useOrders";
+import { useInvoices } from "@/app/hooks/useInvoices";
 import { useEmployees } from "@/app/hooks/useEmployees";
 import { useActivities } from "@/app/hooks/useActivities";
 import { format, subMonths, eachMonthOfInterval, startOfMonth, endOfMonth } from "date-fns";
@@ -37,7 +38,8 @@ export default function Dashboard() {
   const { products, loading: productsLoading, fetchProducts } = useProducts();
   const { customers, loading: customersLoading, fetchCustomers } = useCustomers();
   const { employees, loading: employeesLoading, fetchEmployees } = useEmployees();
-  const { orders, loading: ordersLoading, fetchOrders } = useOrders();
+  const { orders, fetchOrders } = useOrders();
+  const { invoices, fetchInvoices } = useInvoices();
   const { activities, loading: activitiesLoading, fetchRecentActivities } = useActivities();
 
   const [loading, setLoading] = useState(true);
@@ -51,6 +53,7 @@ export default function Dashboard() {
         fetchCustomers(),
         fetchEmployees(),
         fetchOrders(),
+        fetchInvoices(),
         fetchRecentActivities(10),
       ]);
       setLoading(false);
@@ -63,18 +66,33 @@ export default function Dashboard() {
     (p) => p.stock <= p.minStock && p.status === "active"
   );
 
-  // Calculate total revenue from orders
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.grandTotal || 0), 0);
+  // POS invoices + online orders both count toward revenue
+  const salesRecords = useMemo(() => {
+    const fromInvoices = invoices
+      .filter((i) => i.status !== "cancelled" && i.paymentStatus === "paid")
+      .map((i) => ({
+        createdAt: new Date(i.createdAt),
+        amount: i.grandTotal || 0,
+      }));
 
-  // Calculate total sales (number of orders)
-  const totalSales = orders.length;
+    const fromOrders = orders
+      .filter((o) => o.paymentStatus === "paid" && o.orderStatus !== "cancelled")
+      .map((o) => ({
+        createdAt: new Date(o.createdAt),
+        amount: o.grandTotal || 0,
+      }));
 
-  // Generate sales chart data from orders
-  const generateChartData = () => {
+    return [...fromInvoices, ...fromOrders];
+  }, [invoices, orders]);
+
+  const totalRevenue = salesRecords.reduce((sum, r) => sum + r.amount, 0);
+  const totalSales = salesRecords.length;
+
+  const chartData = useMemo(() => {
     const months = 12;
     const now = new Date();
     const startDate = subMonths(now, months - 1);
-    
+
     const monthRange = eachMonthOfInterval({
       start: startDate,
       end: now,
@@ -83,24 +101,20 @@ export default function Dashboard() {
     return monthRange.map((month) => {
       const monthStart = startOfMonth(month);
       const monthEnd = endOfMonth(month);
-      
-      const monthOrders = orders.filter((o) => {
-        const orderDate = new Date(o.createdAt);
-        return orderDate >= monthStart && orderDate <= monthEnd;
-      });
 
-      const monthRevenue = monthOrders.reduce((sum, o) => sum + (o.grandTotal || 0), 0);
-      const monthOrdersCount = monthOrders.length;
+      const monthSales = salesRecords.filter(
+        (r) => r.createdAt >= monthStart && r.createdAt <= monthEnd
+      );
+
+      const monthRevenue = monthSales.reduce((sum, r) => sum + r.amount, 0);
 
       return {
         month: format(month, "MMM"),
         revenue: Math.round(monthRevenue),
-        orders: monthOrdersCount,
+        orders: monthSales.length,
       };
     });
-  };
-
-  const chartData = generateChartData();
+  }, [salesRecords]);
 
   // Stats for dashboard
   const stats = [
@@ -250,7 +264,7 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Orders / month</CardTitle>
+            <CardTitle>Sales / month</CardTitle>
           </CardHeader>
           <CardContent className="h-72">
             <ResponsiveContainer width="100%" height="100%">

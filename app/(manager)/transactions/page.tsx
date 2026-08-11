@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useInvoices } from "@/app/hooks/useInvoices";
 import { PageHeader } from "@/components/page-header";
+import { StatCard } from "@/components/stat-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +38,10 @@ import {
   Eye,
   Undo2,
   Loader2,
+  DollarSign,
+  Clock,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -58,6 +63,19 @@ export default function TransactionsPage() {
   useEffect(() => {
     fetchInvoices();
   }, [fetchInvoices]);
+
+  const stats = useMemo(() => {
+    const active = invoices.filter((i) => i.status !== "cancelled");
+    return {
+      total: active.length,
+      paid: active.filter((i) => i.paymentStatus === "paid").length,
+      pending: active.filter((i) => i.paymentStatus === "pending").length,
+      cancelled: invoices.filter((i) => i.status === "cancelled").length,
+      revenue: active
+        .filter((i) => i.paymentStatus === "paid")
+        .reduce((sum, i) => sum + (i.grandTotal || 0), 0),
+    };
+  }, [invoices]);
 
   const filtered = useMemo(
     () =>
@@ -118,6 +136,15 @@ export default function TransactionsPage() {
         title="Transactions"
         description="All invoices generated from the POS."
       />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <StatCard label="Total" value={stats.total} icon={Receipt} />
+        <StatCard label="Paid" value={stats.paid} icon={CheckCircle2} />
+        <StatCard label="Pending" value={stats.pending} icon={Clock} />
+        <StatCard label="Cancelled" value={stats.cancelled} icon={XCircle} />
+        <StatCard label="Revenue" value={`$${stats.revenue.toLocaleString()}`} icon={DollarSign} />
+      </div>
+
       <Card>
         <CardContent className="space-y-4 p-4 sm:p-6">
           <div className="flex flex-wrap items-center gap-3">
@@ -130,7 +157,7 @@ export default function TransactionsPage() {
                 className="pl-8"
               />
             </div>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(v) => setStatus(v ?? "all")}>
               <SelectTrigger className="w-44">
                 <SelectValue />
               </SelectTrigger>

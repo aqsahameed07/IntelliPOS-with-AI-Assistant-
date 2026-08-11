@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import Customer from "@/app/models/Customer";
 import User from "@/app/models/User";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 import bcrypt from "bcryptjs";
 
 // GET - Get single customer
@@ -139,6 +140,11 @@ export async function PUT(
           );
         }
 
+        await logActivity(user, "customer", `Customer "${updatedCustomer!.name}" updated`, {
+          customerId: id,
+          name: updatedCustomer!.name,
+        });
+
         return NextResponse.json({
           success: true,
           data: updatedCustomer,
@@ -196,6 +202,11 @@ export async function DELETE(
           // Option 2: Or soft delete by setting status to inactive
           // await User.findByIdAndUpdate(customer.userId, { status: "inactive" });
         }
+
+        await logActivity(user, "customer", `Customer "${customer.name}" deleted`, {
+          customerId: id,
+          name: customer.name,
+        });
 
         return NextResponse.json({
           success: true,

@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import { Order } from "@/app/models/Order";
 import { Product } from "@/app/models/Product";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Get single order
 export async function GET(
@@ -84,6 +85,11 @@ export async function DELETE(
           orderStatus: "cancelled",
           deletedBy: user.id,
           deletedAt: new Date(),
+        });
+
+        await logActivity(user, "order", `Order ${order.number} deleted`, {
+          orderId: id,
+          orderNumber: order.number,
         });
 
         return NextResponse.json({

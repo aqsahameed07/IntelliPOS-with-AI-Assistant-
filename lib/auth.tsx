@@ -230,10 +230,15 @@ export function AuthProvider({
         
         // If auto-login fails, return success but user needs to login
         const { password: _pw, ...safe } = u;
-        if (!safe.id) {
-          safe.id = generateObjectId();
-        }
-        return { ok: true, user: safe };
+        const user: User = {
+          id: safe.id ?? generateObjectId(),
+          name: safe.name,
+          email: safe.email,
+          role: safe.role,
+          phone: safe.phone,
+          address: safe.address,
+        };
+        return { ok: true, user };
       }
 
       // If backend returns error
@@ -271,16 +276,25 @@ export function AuthProvider({
 
     const { password: _pw, ...safe } = safeUser;
 
+    const user: User = {
+      id: safe.id,
+      name: safe.name,
+      email: safe.email,
+      role: safe.role,
+      phone: safe.phone,
+      address: safe.address,
+    };
+
     window.localStorage.setItem(
       SESSION_KEY,
-      JSON.stringify(safe)
+      JSON.stringify(user)
     );
 
-    setUser(safe);
+    setUser(user);
 
     return {
       ok: true,
-      user: safe,
+      user,
     };
   };
 

@@ -33,7 +33,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import { useAuth } from "@/lib/auth";
+import { useAuth, type Role } from "@/lib/auth";
 
 const ALL = [
   {
@@ -125,7 +125,7 @@ export function AppSidebar() {
   const role = user?.role ?? "Admin";
 
   const items = ALL.filter((item) =>
-    item.roles.includes(role)
+    (item.roles as readonly Role[]).includes(role)
   );
 
   return (

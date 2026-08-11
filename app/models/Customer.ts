@@ -1,6 +1,20 @@
 // app/models/Customer.ts
 import mongoose, { Schema, model, models } from "mongoose";
 
+export interface ICustomer {
+  _id?: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  totalPurchases?: number;
+  status: "active" | "inactive";
+  userId: string;
+  createdBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 const CustomerSchema = new Schema(
   {
     name: {

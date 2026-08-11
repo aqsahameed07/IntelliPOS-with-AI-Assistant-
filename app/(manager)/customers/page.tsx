@@ -4,7 +4,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { useCustomers } from "@/app/hooks/useCustomers";
 import { useOrders } from "@/app/hooks/useOrders";
-import { useActivities } from "@/lib/store";
 import type { ICustomer } from "@/app/models/Customer";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -64,7 +63,6 @@ export default function CustomersPage() {
   } = useCustomers();
 
   const { orders, fetchOrders, loading: ordersLoading } = useOrders();
-  const { push } = useActivities();
 
   const [q, setQ] = useState("");
   const [dialog, setDialog] = useState<{ mode: "add" | "edit"; id?: string } | null>(null);
@@ -163,7 +161,6 @@ export default function CustomersPage() {
       if (dialog?.mode === "add") {
         const result = await createCustomer(customerData);
         if (result) {
-          push({ type: "customer", message: `Customer '${form.name}' added` });
           toast.success(
             `Customer created successfully!\nEmail: ${form.email}\nPassword: ${form.password}`,
             { duration: 8000 }
@@ -189,7 +186,7 @@ export default function CustomersPage() {
   const handleDeleteClick = (customer: ICustomer) => {
     setDeleteDialog({
       open: true,
-      customerId: customer._id,
+      customerId: customer._id ?? null,
       customerName: customer.name
     });
   };
@@ -199,7 +196,6 @@ export default function CustomersPage() {
     
     const success = await deleteCustomer({ id: deleteDialog.customerId });
     if (success) {
-      push({ type: "customer", message: `Customer "${deleteDialog.customerName}" deleted` });
       toast.success(`Customer "${deleteDialog.customerName}" deleted successfully`);
       setDeleteDialog({ open: false, customerId: null, customerName: "" });
       await fetchCustomers();
@@ -306,10 +302,8 @@ export default function CustomersPage() {
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
-                          <DropdownMenuTrigger >
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
+                          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}>
+                            <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => setView(c)}>

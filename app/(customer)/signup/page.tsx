@@ -74,13 +74,10 @@ export default function CustomerSignupPage() {
     setLoading(true);
 
     try {
-      // Await the signup promise
       const res = await signup({
         ...form,
         role: "Customer",
       });
-
-      setLoading(false);
 
       if (!res.ok) {
         toast.error(res.error);
@@ -89,11 +86,10 @@ export default function CustomerSignupPage() {
       }
 
       toast.success("Account created! Welcome to Nimbus!");
+
       router.replace(landingFor(res.user.role));
-    } catch (error) {
+    } finally {
       setLoading(false);
-      toast.error(error instanceof Error ? error.message : "Signup failed. Please try again.");
-      setErrors({ email: "Signup failed. Please try again." });
     }
   };
 

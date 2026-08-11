@@ -206,7 +206,7 @@ export default function RefundsPage() {
                 className="pl-8"
               />
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v ?? "all")}>
               <SelectTrigger className="w-44">
                 <SelectValue />
               </SelectTrigger>
@@ -552,7 +552,7 @@ function RefundDialog({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => setExchanges([...exchanges, { productId: "", qty: 1 }])}
+                onClick={() => setExchanges([...exchanges, { productId: "", name: "", qty: 1, price: 0, lineTotal: 0 }])}
               >
                 Add item
               </Button>
@@ -567,7 +567,7 @@ function RefundDialog({
                         value={ex.productId}
                         onValueChange={(v) => {
                           const next = [...exchanges];
-                          next[idx] = { ...next[idx], productId: v };
+                          next[idx] = { ...next[idx], productId: v ?? "" };
                           setExchanges(next);
                         }}
                       >
@@ -618,7 +618,7 @@ function RefundDialog({
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label>Reason</Label>
-              <Select value={reason} onValueChange={setReason}>
+              <Select value={reason} onValueChange={(v) => setReason(v ?? "")}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select reason…" />
                 </SelectTrigger>

@@ -24,8 +24,8 @@ export default function LoginPage() {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    email: "demo@nimbus.io",
-    password: "demo1234",
+    email: "admin@intellipos.com",
+    password: "Admin123!",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -111,29 +111,13 @@ export default function LoginPage() {
             <CardDescription>
               Try{" "}
               <code className="rounded bg-muted px-1">
-                demo@nimbus.io
+                admin@intellipos.com
               </code>{" "}
               /
               <code className="rounded bg-muted px-1">
-                demo1234
+                Admin123!
               </code>{" "}
-              (Admin),{" "}
-              <code className="rounded bg-muted px-1">
-                staff@nimbus.io
-              </code>
-              /
-              <code className="rounded bg-muted px-1">
-                staff1234
-              </code>{" "}
-              (Employee), or{" "}
-              <code className="rounded bg-muted px-1">
-                shopper@nimbus.io
-              </code>
-              /
-              <code className="rounded bg-muted px-1">
-                shop1234
-              </code>{" "}
-              (Customer).
+              (Admin)
             </CardDescription>
           </CardHeader>
 
@@ -185,6 +169,18 @@ export default function LoginPage() {
                   Create one
                 </Link>
               </p>
+
+              <p className="text-center text-xs text-muted-foreground">
+  Employee accounts are created by an administrator from the Admin Panel.
+  If you are a customer, please{" "}
+  <Link
+    href="/signup"
+    className="font-medium text-primary hover:underline"
+  >
+    sign up here
+  </Link>
+  .
+</p>
             </form>
           </CardContent>
         </Card>

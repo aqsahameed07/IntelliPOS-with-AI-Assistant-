@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import { saveBase64Image, isBase64Image } from "@/lib/server-image-utils";
 import { Category } from "@/app/models/Category";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch all categories (Public - Anyone can view)
 export async function GET(request: NextRequest) {
@@ -87,6 +88,11 @@ export async function POST(request: NextRequest) {
           status: body.status || "active",
           createdBy: user.id,
           updatedBy: user.id,
+        });
+
+        await logActivity(user, "category", `Category "${category.name}" created`, {
+          categoryId: category._id,
+          name: category.name,
         });
         
         return NextResponse.json({

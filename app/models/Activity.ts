@@ -2,7 +2,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IActivity extends Document {
-  type: "product" | "order" | "customer" | "payment" | "inventory" | "system" | "employee" | "sale";
+  type: "product" | "order" | "customer" | "payment" | "inventory" | "system" | "employee" | "sale" | "category" | "vendor" | "invoice" | "refund";
   message: string;
   userId: string;
   userEmail: string;
@@ -15,7 +15,7 @@ const ActivitySchema = new Schema<IActivity>(
   {
     type: {
       type: String,
-      enum: ["product", "order", "customer", "payment", "inventory", "system", "employee", "sale"],
+      enum: ["product", "order", "customer", "payment", "inventory", "system", "employee", "sale", "category", "vendor", "invoice", "refund"],
       required: true,
     },
     message: {

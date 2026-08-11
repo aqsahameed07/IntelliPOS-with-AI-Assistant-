@@ -26,10 +26,10 @@ export interface IInvoice extends Document {
   tax: number;
   grandTotal: number;
   paymentMethod: "cash" | "card" | "bank" | "pending";
-  paymentStatus: "paid" | "pending" | "failed";
+  paymentStatus: "paid" | "pending" | "failed" | "refunded" | "partially_refunded";
   paymentReference?: string;
   notes?: string;
-  status: "draft" | "confirmed" | "cancelled" | "refunded";
+  status: "draft" | "confirmed" | "cancelled" | "refunded" | "deleted";
   isDeleted: boolean;
   createdBy: string;
   updatedBy: string;

@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import Customer from "@/app/models/Customer";
 import User from "@/app/models/User";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 import bcrypt from "bcryptjs";
 
 // GET - Fetch all customers
@@ -144,6 +145,12 @@ export async function POST(request: NextRequest) {
           totalPurchases: 0,
           userId: newUser._id,
           createdBy: user.id,
+        });
+
+        await logActivity(user, "customer", `Customer "${customer.name}" created`, {
+          customerId: customer._id,
+          name: customer.name,
+          email: customer.email,
         });
 
         return NextResponse.json({

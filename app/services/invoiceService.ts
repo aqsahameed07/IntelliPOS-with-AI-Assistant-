@@ -49,15 +49,15 @@ const getAuthToken = (): string | null => {
 const authFetch = async (url: string, options: RequestInit = {}) => {
   const token = getAuthToken();
   
-  const headers: HeadersInit = {
+  const headers = new Headers({
     'Content-Type': 'application/json',
-    ...options.headers,
-  };
-  
+    ...(options.headers as HeadersInit | undefined),
+  });
+
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
-  
+
   const response = await fetch(url, {
     ...options,
     headers,
@@ -138,7 +138,6 @@ export const invoiceService = {
   // Create invoice
   async createInvoice(data: Partial<IInvoice>): Promise<InvoiceResponse> {
     try {
-      console.log('Creating invoice with data:', JSON.stringify(data, null, 2));
       
       const response = await authFetch(buildApiUrl("/api/invoices"), {
         method: "POST",
@@ -146,7 +145,7 @@ export const invoiceService = {
       });
 
       const result = await response.json();
-      console.log('Invoice creation response:', result);
+      
       
       if (!response.ok) {
         console.error('Create invoice failed:', result);

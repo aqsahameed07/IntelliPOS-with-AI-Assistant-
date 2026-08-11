@@ -3,7 +3,6 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useEmployees } from "@/app/hooks/useEmployees";
-import { useActivities } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,8 +71,6 @@ export default function EmployeesPage() {
     getStats,
     searchEmployees,
   } = useEmployees();
-
-  const { push } = useActivities();
 
   const [q, setQ] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -169,7 +166,6 @@ export default function EmployeesPage() {
       if (dialog?.mode === "add") {
         const result = await createEmployee(employeeData);
         if (result) {
-          push({ type: "employee", message: `Employee '${form.name}' added` });
           toast.success(
             `Employee created successfully!\nEmail: ${form.email}\nPassword: ${form.password}`,
             { duration: 8000 }
@@ -205,7 +201,6 @@ export default function EmployeesPage() {
     
     const success = await deleteEmployee({ id: deleteDialog.employeeId });
     if (success) {
-      push({ type: "employee", message: `Employee "${deleteDialog.employeeName}" deleted` });
       toast.success(`Employee "${deleteDialog.employeeName}" deleted successfully`);
       setDeleteDialog({ open: false, employeeId: null, employeeName: "" });
       await fetchEmployees();
@@ -257,7 +252,7 @@ export default function EmployeesPage() {
                 className="pl-8" 
               />
             </div>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v ?? "all")}>
               <SelectTrigger className="w-44">
                 <SelectValue />
               </SelectTrigger>
@@ -316,10 +311,8 @@ export default function EmployeesPage() {
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
-                        <DropdownMenuTrigger >
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
+                        <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}>
+                          <MoreHorizontal className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setView(e)}>
@@ -391,7 +384,7 @@ export default function EmployeesPage() {
             <FormField label="Role">
               <Select 
                 value={form.role} 
-                onValueChange={(v) => setForm({ ...form, role: v })}
+                onValueChange={(v) => setForm({ ...form, role: v ?? form.role })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -407,7 +400,7 @@ export default function EmployeesPage() {
             <FormField label="Department">
               <Select 
                 value={form.department} 
-                onValueChange={(v) => setForm({ ...form, department: v })}
+                onValueChange={(v) => setForm({ ...form, department: v ?? form.department })}
               >
                 <SelectTrigger>
                   <SelectValue />

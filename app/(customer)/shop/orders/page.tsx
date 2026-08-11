@@ -51,9 +51,7 @@ export default function MyOrders() {
           title="No orders yet" 
           description="Start shopping to place your first order."
           action={
-            <Button >
-              <Link href="/shop">Start shopping</Link>
-            </Button>
+            <Button render={<Link href="/shop" />}>Start shopping</Button>
           } 
         />
       ) : (
@@ -84,8 +82,8 @@ export default function MyOrders() {
                     </p>
                   </div>
                   <p className="font-semibold">${(o.grandTotal || 0).toFixed(2)}</p>
-                  <Button variant="outline" size="sm" >
-                    <Link href={`/shop/orders/${o._id || o.id}`}>Details</Link>
+                  <Button variant="outline" size="sm" render={<Link href={`/shop/orders/${o._id || o.id}`} />}>
+                    Details
                   </Button>
                 </CardContent>
               </Card>

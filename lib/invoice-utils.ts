@@ -1,4 +1,20 @@
-import type { Invoice } from "./mock-data";
+import type { Invoice, InvoiceItem } from "./mock-data";
+
+export type PrintableInvoice = {
+  id?: string;
+  number: string;
+  customerName: string;
+  employeeName: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  discount: number;
+  tax: number;
+  grandTotal: number;
+  paymentMethod: string;
+  paymentStatus: string;
+  notes?: string;
+  createdAt: string | Date;
+};
 
 function esc(v: unknown): string {
   return String(v ?? "")
@@ -9,7 +25,7 @@ function esc(v: unknown): string {
     .replace(/'/g, "&#39;");
 }
 
-export function renderInvoiceHtml(inv: Invoice): string {
+export function renderInvoiceHtml(inv: PrintableInvoice): string {
   const rows = inv.items.map((i) =>
     `<tr><td style="padding:6px 8px;border-bottom:1px solid #eee">${esc(i.name)}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right">${i.qty}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right">$${i.price.toFixed(2)}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right">$${i.lineTotal.toFixed(2)}</td></tr>`
   ).join("");
@@ -44,14 +60,14 @@ export function renderInvoiceHtml(inv: Invoice): string {
   </div>`;
 }
 
-export function printInvoice(inv: Invoice) {
+export function printInvoice(inv: PrintableInvoice) {
   const w = window.open("", "_blank", "width=700,height=800");
   if (!w) return;
   w.document.write(`<html><head><title>${esc(inv.number)}</title></head><body>${renderInvoiceHtml(inv)}<script>window.onload=()=>{window.print();}</script></body></html>`);
   w.document.close();
 }
 
-export function downloadInvoice(inv: Invoice) {
+export function downloadInvoice(inv: PrintableInvoice) {
   const blob = new Blob([`<html><body>${renderInvoiceHtml(inv)}</body></html>`], { type: "text/html" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

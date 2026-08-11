@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import { InventoryMovement } from "@/app/models/InventoryMovement";
 import { Product } from "@/app/models/Product";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // GET - Fetch all inventory movements
 export async function GET(request: NextRequest) {
@@ -42,13 +43,14 @@ export async function GET(request: NextRequest) {
     
     // Date range filter
     if (startDate || endDate) {
-      query.createdAt = {};
+      const createdAt: Record<string, Date> = {};
       if (startDate) {
-        query.createdAt.$gte = new Date(startDate);
+        createdAt.$gte = new Date(startDate);
       }
       if (endDate) {
-        query.createdAt.$lte = new Date(endDate + 'T23:59:59.999Z');
+        createdAt.$lte = new Date(endDate + 'T23:59:59.999Z');
       }
+      query.createdAt = createdAt;
     }
     
     const [movements, total] = await Promise.all([
@@ -177,6 +179,15 @@ export async function POST(request: NextRequest) {
         await Product.findByIdAndUpdate(body.productId, {
           stock: newStock,
           updatedBy: user.id,
+        });
+
+        const qtyLabel = body.qty >= 0 ? `+${body.qty}` : `${body.qty}`;
+        await logActivity(user, "inventory", `Inventory ${body.type}: ${qtyLabel} ${product.name}`, {
+          movementId: movement._id,
+          productId: body.productId,
+          productName: product.name,
+          type: body.type,
+          qty: body.qty,
         });
         
         return NextResponse.json({

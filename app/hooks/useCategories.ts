@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { categoryService } from "@/app/services/categoryService";
 import { ICategory } from "@/app/models/Category";
 import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 
 interface UseCategoriesReturn {
   categories: ICategory[];

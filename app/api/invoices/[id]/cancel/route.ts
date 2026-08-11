@@ -5,6 +5,7 @@ import { Invoice } from "@/app/models/Invoice";
 import { Product } from "@/app/models/Product";
 import { InventoryMovement } from "@/app/models/InventoryMovement";
 import { withAuth } from "@/lib/authMiddleware";
+import { logActivity } from "@/lib/activity-logger";
 
 // PATCH - Cancel invoice and restore stock
 export async function PATCH(
@@ -92,6 +93,12 @@ export async function PATCH(
           }
         }
         
+        await logActivity(user, "invoice", `Invoice ${invoice.number} cancelled`, {
+          invoiceId: id,
+          invoiceNumber: invoice.number,
+          reason,
+        });
+
         return NextResponse.json({
           success: true,
           data: updatedInvoice,

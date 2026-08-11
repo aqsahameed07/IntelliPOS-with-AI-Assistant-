@@ -218,7 +218,7 @@ export default function CategoriesPage() {
     }
     setDeleteDialog({
       open: true,
-      categoryId: category.id,
+      categoryId: category.id ?? null,
       categoryName: category.name
     });
   };
@@ -301,10 +301,8 @@ export default function CategoriesPage() {
                         </p>
                       </div>
                       <DropdownMenu>
-                        <DropdownMenuTrigger >
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
+                        <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-7 w-7" />}>
+                          <MoreHorizontal className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEdit(c)}>
